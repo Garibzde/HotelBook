@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  TWIN
+  SUITE
+  FAMILY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  CHECKED_IN
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bookings Booking[]
+}
+
+model HotelInfo {
+  id          Int      @id @default(1)
+  name        String
+  description String?
+  address     String
+  city        String
+  phone       String?
+  email       String?
+  stars       Int      @default(3)
+  updatedAt   DateTime @updatedAt
+}
+
+model Room {
+  id            Int      @id @default(autoincrement())
+  roomNumber    String   @unique
+  name          String
+  type          RoomType
+  pricePerNight Decimal  @db.Decimal(10, 2)
+  capacity      Int
+  description   String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bookings Booking[]
+  images   Image[]
+
+  @@index([type])
+}
+
+model Booking {
+  id          Int           @id @default(autoincrement())
+  bookingCode String        @unique @default(uuid())
+  userId      Int
+  roomId      Int
+  checkIn     DateTime      @db.Date
+  checkOut    DateTime      @db.Date
+  guests      Int
+  totalPrice  Decimal       @db.Decimal(10, 2)
+  status      BookingStatus @default(PENDING)
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  room    Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  payment Payment?
+  review  Review?
+
+  @@index([roomId, checkIn, checkOut])
+  @@index([userId])
+}
+
+model Payment {
+  id          Int           @id @default(autoincrement())
+  bookingId   Int           @unique
+  amount      Decimal       @db.Decimal(10, 2)
+  status      PaymentStatus @default(PENDING)
+  provider    String        @default("mock")
+  providerRef String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  roomId    Int?
+  createdAt DateTime @default(now())
+
+  room Room? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  bookingId Int      @unique
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
