@@ -9,6 +9,7 @@ datasource db {
 
 enum Role {
   USER
+  MANAGER
   ADMIN
 }
 
@@ -36,32 +37,44 @@ enum PaymentStatus {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(USER)
+  managedHotelId Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  bookings Booking[]
+  managedHotel Hotel?    @relation("HotelManagers", fields: [managedHotelId], references: [id], onDelete: SetNull)
+  bookings     Booking[]
+
+  @@index([managedHotelId])
 }
 
-model HotelInfo {
-  id          Int      @id @default(1)
+model Hotel {
+  id          Int      @id @default(autoincrement())
   name        String
-  description String?
-  address     String
   city        String
-  phone       String?
-  email       String?
+  address     String
+  description String?
   stars       Int      @default(3)
+  phone       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  managers User[]  @relation("HotelManagers")
+  rooms    Room[]
+  images   Image[]
+
+  @@index([city])
 }
 
 model Room {
   id            Int      @id @default(autoincrement())
-  roomNumber    String   @unique
+  hotelId       Int
+  roomNumber    String
   name          String
   type          RoomType
   pricePerNight Decimal  @db.Decimal(10, 2)
@@ -71,9 +84,12 @@ model Room {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  hotel    Hotel     @relation(fields: [hotelId], references: [id], onDelete: Cascade)
   bookings Booking[]
   images   Image[]
 
+  @@unique([hotelId, roomNumber])
+  @@index([hotelId])
   @@index([type])
 }
 
@@ -116,11 +132,14 @@ model Payment {
 model Image {
   id        Int      @id @default(autoincrement())
   url       String
+  hotelId   Int?
   roomId    Int?
   createdAt DateTime @default(now())
 
-  room Room? @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  hotel Hotel? @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  room  Room?  @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
+  @@index([hotelId])
   @@index([roomId])
 }
 
