@@ -1,6 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
+import { z } from "zod";
 import { AppError } from "../utils/AppError.js";
+import { formatZodError } from "../utils/validate.js";
 import { Prisma } from "../generated/prisma/client.js";
+import { logger } from "../lib/logger.js";
+import { env } from "../config/env.js";
 
 export function errorHandler(
   err: unknown,
@@ -18,6 +22,11 @@ export function errorHandler(
     code = err.code;
     message = err.message;
     details = err.details;
+  } else if (err instanceof z.ZodError) {
+    statusCode = 400;
+    code = "VALIDATION_ERROR";
+    message = "Validation failed";
+    details = formatZodError(err);
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
       statusCode = 409;
@@ -39,10 +48,10 @@ export function errorHandler(
   }
 
   if (statusCode >= 500) {
-    console.error(err);
+    logger.error({ err }, "Unhandled error");
   }
 
-  const isDev = process.env.NODE_ENV !== "production";
+  const isDev = env.NODE_ENV !== "production";
 
   res.status(statusCode).json({
     success: false,

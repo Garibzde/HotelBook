@@ -1,16 +1,18 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { sendSuccess } from "./utils/response.js";
+import { env } from "./config/env.js";
+import { httpLogger } from "./middleware/httpLogger.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { prisma } from "./lib/prisma.js";
+import { sendSuccess } from "./utils/response.js";
 
 const app = express();
 
+app.use(httpLogger);
 app.use(helmet());
-app.use(cors());
-app.use(express.json());
+app.use(cors({ origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()) }));
+app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(
