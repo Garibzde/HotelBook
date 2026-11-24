@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
-import { AppError } from "../utils/AppError.js";
+import { AppError } from "../lib/errors.js";
 import { formatZodError } from "../utils/validate.js";
 import { Prisma } from "../generated/prisma/client.js";
 import { logger } from "../lib/logger.js";

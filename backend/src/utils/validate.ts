@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationError } from "./AppError.js";
+import { ValidationError } from "../lib/errors.js";
 
 export function formatZodError(error: z.ZodError) {
   return error.issues.map((issue) => ({
