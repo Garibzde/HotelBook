@@ -183,7 +183,7 @@ AI-ın tapdıqları (Claude):
 5. Bazada CHECK constraint yoxdur (`checkOut > checkIn`, `rating` 1–5 arası, `pricePerNight > 0`). Prisma bunu sxemdə dəstəkləmir, migrasiyaya raw SQL ilə əlavə etmək olar.
 
 Hansı ilə razı deyiləm və niyə:
----
+
 Birinci tövsiyə ilə qismən razı deyiləm. Frontend, onlayn ödəniş və QR kod funksionallığının layihənin həcmini artırdığını qəbul edirəm. Lakin bu funksiyaları tamamilə çıxarmaq istəmirəm, çünki HotelBook layihəsini real otel rezervasiya sisteminə daha yaxın və portfoliom üçün daha funksional etmək istəyirəm.
 
 İlk növbədə əsas backend funksiyalarını, biznes qaydalarını, təhlükəsizlik yoxlamalarını və testləri tamamlayacağam. Daha sonra vaxtım imkan verərsə, ardıcıllıqla onlayn ödəniş, QR kodlu e-poçt göndərilməsi və frontend hissəsini hazırlayacağam. Bu əlavələr əsas layihənin vaxtında təhvil verilməsinə mane olmayacaq.
