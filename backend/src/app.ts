@@ -6,6 +6,7 @@ import { httpLogger } from "./middleware/httpLogger.js";
 import { notFound } from "./middleware/notFound.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { sendSuccess } from "./utils/response.js";
+import apiRouter from "./routes/index.js";
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.get("/api/health", (_req, res) => {
     "HotelBook API is running",
   );
 });
+
+
+app.use("/api", apiRouter);
 
 
 
